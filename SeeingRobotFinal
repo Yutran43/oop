@@ -1,0 +1,36 @@
+class ScoutBot : public GenericRobot {
+private:
+    int remainingScans = 3;
+
+public:
+    ScoutBot(std::string& type, std::string& name, int x, int y, Battlefield* bf)
+        : Robot(type, name, x, y, bf), GenericRobot(type, name, x, y, bf) {
+        setRobotType("ScoutBot");
+        setRobotName(name + "_ScoutBot");
+    }
+
+    void look(int dx, int dy) override {
+        if (remainingScans > 0) {
+            battlefield->getLogger()->log(robotName() + " uses SCOUT VISION to scan the entire battlefield.\n");
+
+            for (Robot* other : battlefield->getRobots()) {
+                if (other != this && other->isAlive()) {
+                    battlefield->getLogger()->log(
+                        robotName() + " found " + other->getName() + " at (" +
+                        std::to_string(other->getX()) + "," +
+                        std::to_string(other->getY()) + ")\n"
+                    );
+                    foundRobot.push_back({other->getX(), other->getY()});
+                }
+            }
+
+            remainingScans--;
+            battlefield->getLogger()->log(robotName() + " has " +
+                std::to_string(remainingScans) + " SCOUT scans left.\n");
+
+        } else {
+            battlefield->getLogger()->log(robotName() +
+                " has no SCOUT VISION scans left! Cannot look.\n");
+        }
+    }
+};
