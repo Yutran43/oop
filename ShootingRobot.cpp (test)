@@ -136,4 +136,96 @@ public:
                 break;
             }
         }
+    };
+// ThirtyShotBot
+class ThirtyShotBot : public ShootingBot {
+public:
+    ThirtyShotBot(string t, string n, int x, int y, Battlefield* bf)
+        : Robot(t, n, x, y, bf), ShootingBot(t, n, x, y, bf) {
+        setRobotType("ThirtyShotBot");
+        setRobotName(n + "_ThirtyShotBot");
+        shells = 30;
     }
+
+    void fire(int dx, int dy) override {
+        if (shells <= 0) return;
+
+        int targetX = x() + dx;
+        int targetY = y() + dy;
+
+        if (!battlefield->isInside(targetX, targetY)) {
+            battlefield->getLogger()->log(robotName() + " tried to fire outside the battlefield.\n");
+            return;
+        }
+
+        shells--;
+        battlefield->getLogger()->log(robotName() + " fires at (" + to_string(targetX) + ", " + to_string(targetY) + ") [Shells left: " + to_string(shells) + "]\n");
+
+        for (Robot* other : battlefield->getRobots()) {
+            if (other != this && other->isAlive() && other->x() == targetX && other->y() == targetY) {
+                battlefield->getLogger()->log(robotName() + " hits " + other->robotName() + "!\n");
+                other->takeDamage();
+                break;
+            }
+        }
+    }
+
+    void actionMove() override {
+        int dx = rand() % 3 - 1;
+        int dy = rand() % 3 - 1;
+        move(dx, dy);
+    }
+
+    void actions() override {
+        fire(1, 0); // Example directional fire
+        actionMove();
+    }
+};
+class SemiAutoBot : public ShootingBot {
+public:
+    SemiAutoBot(string t, string n, int x, int y, Battlefield* bf)
+        : Robot(t, n, x, y, bf), ShootingBot(t, n, x, y, bf) {
+        setRobotType("SemiAutoBot");
+        setRobotName(n + "_SemiAutoBot");
+    }
+
+    void fire(int dx, int dy) override {
+        if (shells <= 0) return;
+
+        int targetX = x() + dx;
+        int targetY = y() + dy;
+
+        if (!battlefield->isInside(targetX, targetY)) {
+            battlefield->getLogger()->log(robotName() + " tried to fire outside the battlefield.\n");
+            return;
+        }
+
+        shells--;
+        battlefield->getLogger()->log(robotName() + " fires 3 rounds at (" + to_string(targetX) + ", " + to_string(targetY) + ")\n");
+
+        for (int i = 0; i < 3; ++i) {
+            for (Robot* other : battlefield->getRobots()) {
+                if (other != this && other->isAlive() && other->x() == targetX && other->y() == targetY) {
+                    if ((rand() % 100) < 70) {
+                        battlefield->getLogger()->log(robotName() + " hits " + other->robotName() + " (round " + to_string(i+1) + ")!\n");
+                        other->takeDamage();
+                        if (!other->isAlive()) break;
+                    } else {
+                        battlefield->getLogger()->log(robotName() + " misses (round " + to_string(i+1) + ")\n");
+                    }
+                }
+            }
+        }
+    }
+
+    void actionMove() override {
+        int dx = rand() % 3 - 1;
+        int dy = rand() % 3 - 1;
+        move(dx, dy);
+    }
+
+    void actions() override {
+        fire(0, 1);  // Example fire forward
+        actionMove();
+    }
+};
