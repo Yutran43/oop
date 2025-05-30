@@ -1,0 +1,43 @@
+class SeeingRobot : public GenericRobot {
+public:
+    SeeingRobot(string id, int x, int y, Battlefield* bf)
+        : GenericRobot(id, x, y, bf) {
+        setRobotType("SeeingRobot");
+    }
+
+    // Abstract method for derived classes
+    virtual void look() = 0;
+};
+class ScoutBot : public SeeingRobot {
+public:
+    ScoutBot(string id, int x, int y, Battlefield* bf)
+        : SeeingRobot(id, x, y, bf) {
+        setRobotType("ScoutBot");
+        setRobotName(id + "_ScoutBot");
+    }
+
+    void look() override {
+        battlefield->getLogger()->log(robotName() + " uses SCOUT VISION and sees the entire battlefield:\n");
+        battlefield->displayToLog();  // Assumes you have a method like this to log the full battlefield
+    }
+
+    void takeTurn() override {
+        battlefield->getLogger()->log(robotName() + "'s turn at (" +
+            std::to_string(x()) + ", " + std::to_string(y()) + ")\n");
+        look();
+        // Move randomly (default GenericRobot behavior)
+        int dx = (rand() % 3) - 1;  // -1, 0, or 1
+        int dy = (rand() % 3) - 1;
+        move(dx, dy);
+    }
+};
+void displayToLog() {
+    std::ostringstream oss;
+    for (int y = 0; y < rows; y++) {
+        for (int x = 0; x < cols; x++) {
+            oss << grid[y][x];
+        }
+        oss << "\n";
+    }
+    logger->log(oss.str());
+}
