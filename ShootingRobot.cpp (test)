@@ -107,3 +107,33 @@ public:
         }
     }
 };
+public:
+    LongShotBot(string t, string n, int x, int y, Battlefield* bf)
+        : Robot(t, n, x, y, bf), ShootingBot(t, n, x, y, bf) {
+        setRobotType("LongShotBot");
+        setRobotName(n + "_LongShotBot");
+    }
+
+    void fire(int dx, int dy) {
+        int distance = abs(dx) + abs(dy);
+        if (distance == 0 || distance > 3 || shells <= 0) return;
+
+        int targetX = x() + dx;
+        int targetY = y() + dy;
+
+        if (!battlefield->isInside(targetX, targetY)) {
+            battlefield->getLogger()->log(robotName() + " tried to fire outside the battlefield.\n");
+            return;
+        }
+
+        shells--;
+        battlefield->getLogger()->log(robotName() + " fires at (" + to_string(targetX) + ", " + to_string(targetY) + ")\n");
+
+        for (Robot* other : battlefield->getRobots()) {
+            if (other != this && other->isAlive() && other->x() == targetX && other->y() == targetY) {
+                battlefield->getLogger()->log(robotName() + " hits " + other->robotName() + "!\n");
+                other->takeDamage();
+                break;
+            }
+        }
+    }
