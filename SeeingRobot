@@ -1,0 +1,37 @@
+class SeeingRobot {
+public:
+    // Pure virtual function for looking at an offset area
+    virtual void look(int dx, int dy) = 0;
+
+    virtual ~SeeingRobot() {}
+};
+class GenericRobot : public Robot, public SeeingRobot {
+protected:
+    int x, y;
+    Battlefield* battlefield;
+
+public:
+    GenericRobot(string name, int startX, int startY, Battlefield* bf)
+        : Robot(name), x(startX), y(startY), battlefield(bf) {}
+
+    void look(int dx, int dy) override {
+        int centerX = x + dx;
+        int centerY = y + dy;
+
+        std::cout << name << " looks at area around (" << centerX << ", " << centerY << "):" << std::endl;
+
+        for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+                int nx = centerX + dx;
+                int ny = centerY + dy;
+
+                if (nx >= 0 && nx < WIDTH && ny >= 0 && ny < HEIGHT) {
+                    std::cout << battlefield->getAt(nx, ny);
+                } else {
+                    std::cout << " "; // Out of bounds
+                }
+            }
+            std::cout << std::endl;
+        }
+    }
+};
